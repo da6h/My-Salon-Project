@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>حجوزات العملاء — BONITA TOUCH</title>
+  <style>
+    :root{
+      --bg:#f8f9fa; --card:#fff; --line:#e5e7eb; --fg:#111; --muted:#6b7280;
+      --accent:#6f4ef6; --success:#10b981; --danger:#ef4444;
+      --radius:12px; --shadow:0 1px 3px rgba(0,0,0,.1);
+    }
+    *{box-sizing:border-box;margin:0}
+    body{
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      background:var(--bg); color:var(--fg); min-height:100vh;
+    }
+
+    .header{
+      background:#fff; border-bottom:1px solid var(--line);
+      padding:16px 24px; display:flex; justify-content:space-between;
+      align-items:center; box-shadow:var(--shadow); position:sticky; top:0; z-index:10;
+    }
+    .header-left{display:flex; align-items:center; gap:16px}
+    .logo{width:48px; height:48px; border-radius:12px; object-fit:cover}
+    .header-title{font-size:20px; font-weight:900}
+    .header-subtitle{font-size:13px; color:var(--muted)}
+    .btn-back{
+      padding:8px 16px; border:1px solid var(--line); border-radius:8px;
+      background:#fff; cursor:pointer; font-weight:700; transition:.2s;
+      text-decoration:none; color:inherit;
+    }
+    .btn-back:hover{background:#f9fafb}
+
+    .container{max-width:1400px; margin:0 auto; padding:24px}
+
+    .stats{
+      display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+      gap:16px; margin-bottom:24px;
+    }
+    .stat-card{
+      background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+      padding:16px; box-shadow:var(--shadow);
+    }
+    .stat-value{font-size:28px; font-weight:900; margin-bottom:4px}
+    .stat-label{font-size:13px; color:var(--muted)}
+
+    .table-container{
+      background:var(--card); border:1px solid var(--line);
+      border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow);
+    }
+    .table-header{
+      padding:16px 20px; border-bottom:1px solid var(--line);
+      display:flex; justify-content:space-between; align-items:center;
+    }
+    .table-title{font-size:18px; font-weight:900}
+    .search-box{
+      padding:8px 16px; border:1px solid var(--line); border-radius:8px;
+      width:280px; font-size:14px;
+    }
+
+    table{width:100%; border-collapse:collapse}
+    th,td{padding:16px 20px; text-align:right; border-bottom:1px solid var(--line)}
+    th{background:#f9fafb; font-weight:700; font-size:13px; color:var(--muted); text-transform:uppercase}
+    tr:last-child td{border-bottom:0}
+    tr:hover{background:#fafbfc}
+
+    .status-badge{
+      display:inline-block; padding:4px 12px; border-radius:999px;
+      font-size:12px; font-weight:700;
+    }
+    .status-confirmed{background:#d1fae5; color:#065f46}
+    .status-cancelled{background:#fee2e2; color:#991b1b}
+
+    .actions{display:flex; gap:8px}
+    .btn{
+      padding:6px 12px; border:1px solid var(--line); border-radius:6px;
+      background:#fff; cursor:pointer; font-size:13px; font-weight:600; transition:.2s;
+    }
+    .btn-view{color:#3b82f6; border-color:#3b82f6}
+    .btn-view:hover{background:#eff6ff}
+    .btn-edit{color:#f59e0b; border-color:#f59e0b}
+    .btn-edit:hover{background:#fef3c7}
+    .btn-delete{color:#ef4444; border-color:#ef4444}
+
+    .loading,.empty{text-align:center; padding:60px; color:var(--muted)}
+
+    .modal{
+      position:fixed; inset:0; background:rgba(0,0,0,.5); display:none;
+      place-items:center; z-index:999; padding:20px;
+    }
+    .modal.show{display:grid}
+    .modal-content{
+      background:#fff; border-radius:20px; width:min(700px,100%);
+      max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,.3);
+    }
+    .modal-header{
+      padding:24px; border-bottom:1px solid var(--line);
+      display:flex; justify-content:space-between; align-items:center;
+    }
+    .modal-title{font-size:20px; font-weight:900}
+    .modal-close{
+      width:36px; height:36px; border:0; border-radius:8px;
+      background:#f3f4f6; cursor:pointer; font-size:20px;
+    }
+    .modal-body{padding:24px}
+    .detail-row{
+      display:flex; justify-content:space-between; padding:12px 0;
+      border-bottom:1px solid var(--line);
+    }
+    .detail-row:last-child{border-bottom:0}
+    .detail-label{color:var(--muted); font-weight:600}
+    .detail-value{font-weight:700}
+
+    /* قائمة الخدمات مع أزرار الحذف */
+    .services-list{margin:12px 0}
+    .service-item{
+      display:flex; justify-content:space-between; align-items:center;
+      padding:12px; background:#f9fafb; border-radius:8px; margin-bottom:8px;
+    }
+    .service-info{flex:1}
+    .service-name{font-weight:700; margin-bottom:4px}
+    .service-meta{font-size:13px; color:var(--muted)}
+    .btn-delete-service{
+      padding:6px 12px; border:1px solid #fca5a5; background:#fef2f2;
+      color:#dc2626; border-radius:6px; cursor:pointer; font-size:12px;
+      font-weight:600; transition:.2s;
+    }
+    .btn-delete-service:hover{background:#fee2e2}
+
+    /* Edit Form Styles */
+    .form-group{margin-bottom:20px}
+    .form-group label{
+      display:block; margin-bottom:10px; font-weight:700; color:var(--fg);
+      font-size:15px; text-align:right;
+    }
+    .form-group input,.form-group select{
+      width:100%; padding:14px; border:1px solid var(--line); border-radius:10px;
+      font-size:15px; background:#fff; transition:.2s;
+    }
+    .form-group input:focus,.form-group select:focus{
+      outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(111,78,246,.1);
+    }
+
+    /* Services Selection */
+    .services-container{
+      max-height:200px; overflow-y:auto; border:1px solid var(--line);
+      border-radius:10px; padding:16px; background:#fafbfc;
+    }
+    .service-option{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:10px 0; border-bottom:1px solid #f0f0f0;
+    }
+    .service-option:last-child{border-bottom:0}
+    .service-info{text-align:right; flex:1; margin-left:12px}
+    .service-name{font-weight:600; color:var(--fg); margin-bottom:2px}
+    .service-details{font-size:13px; color:var(--muted)}
+    .service-checkbox{
+      width:18px; height:18px; accent-color:var(--accent);
+      cursor:pointer;
+    }
+
+    .form-actions{
+      display:flex; gap:12px; justify-content:flex-end; margin-top:28px;
+      padding-top:20px; border-top:1px solid var(--line);
+    }
+    .btn-primary{
+      background:var(--accent); color:#fff; border:1px solid var(--accent);
+      padding:12px 24px; border-radius:10px; font-weight:600; cursor:pointer;
+      transition:.2s; font-size:15px;
+    }
+    .btn-primary:hover{background:#5a3fd6; transform:translateY(-1px)}
+    .btn-secondary{
+      background:#f3f4f6; color:var(--fg); border:1px solid var(--line);
+      padding:12px 24px; border-radius:10px; font-weight:600; cursor:pointer;
+      transition:.2s; font-size:15px;
+    }
+    .btn-secondary:hover{background:#e5e7eb}
+
+    @media (max-width:768px){
+      .search-box{width:100%; margin-top:12px}
+      .table-header{flex-direction:column; align-items:stretch}
+      table{font-size:14px}
+      th,td{padding:12px}
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-left">
+      <img class="logo" 
+           src="https://images.fresha.com/locations/location-profile-images/873704/4817851/87cf053b-8d1c-4549-a7ef-06a12ef5b433-OMBRETOUCH-SA-Fresha.jpg" 
+           alt="Logo">
+      <div>
+        <div class="header-title">حجوزات العملاء</div>
+        <div class="header-subtitle">BONITA TOUCH</div>
+      </div>
+    </div>
+    <a class="btn-back" href="admin.html">← رجوع</a>
+  </header>
+
+  <div class="container">
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-value" id="totalBookings">0</div>
+        <div class="stat-label">إجمالي الحجوزات</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="confirmedBookings">0</div>
+        <div class="stat-label">حجوزات مؤكدة</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="totalCustomers">0</div>
+        <div class="stat-label">عدد العملاء</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value"><span id="totalRevenue">0</span> ر.س</div>
+        <div class="stat-label">الإيرادات</div>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <div class="table-header">
+        <div class="table-title">جميع الحجوزات</div>
+        <input type="search" class="search-box" placeholder="بحث..." id="searchBox">
+      </div>
+      <div class="loading" id="loading">جاري التحميل...</div>
+      <div style="overflow-x:auto; display:none" id="tableWrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>رقم الحجز</th>
+              <th>العميل</th>
+              <th>التاريخ</th>
+              <th>الوقت</th>
+              <th>الخدمات</th>
+              <th>المحترف</th>
+              <th>المبلغ</th>
+              <th>الحالة</th>
+              <th>الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+      <div class="empty" id="emptyState" style="display:none">
+        📭 لا توجد حجوزات
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="detailsModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">تفاصيل الحجز</div>
+        <button class="modal-close" onclick="closeModal()">×</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+  <!-- Edit Modal -->
+  <div class="modal" id="editModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">تعديل الحجز</div>
+        <button class="modal-close" onclick="closeEditModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <form id="editForm">
+          <div class="form-group">
+            <label>📅 التاريخ</label>
+            <input type="date" id="editDate" required>
+          </div>
+          <div class="form-group">
+            <label>⏰ الوقت</label>
+            <input type="time" id="editTime" required>
+          </div>
+          <div class="form-group">
+            <label>👩‍💼 المحترفة</label>
+            <select id="editProfessional" required>
+              <option value="">جاري التحميل...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>💅 الخدمات</label>
+            <div class="services-container" id="editServices">
+              <!-- Services will be loaded here -->
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="closeEditModal()">إلغاء</button>
+            <button type="submit" class="btn btn-primary">حفظ التغييرات</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = 'http://localhost:5000/api';
+    let allBookings = [];
+    let allProfessionals = [];
+    let allServices = [];
+    let currentBookingId = null;
+
+    async function loadBookings() {
+      try {
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('tableWrapper').style.display = 'none';
+        document.getElementById('emptyState').style.display = 'none';
+
+        const response = await fetch(`${API_URL}/bookings`);
+        const result = await response.json();
+
+        if (!result.success) throw new Error('فشل تحميل الحجوزات');
+
+        allBookings = result.data;
+
+        // حساب الإحصائيات
+        const confirmedBookings = allBookings.filter(b => b.status === 'confirmed');
+        const uniqueCustomers = new Set(allBookings.map(b => b.customer_name)).size;
+        const totalRevenue = confirmedBookings.reduce((sum, b) => sum + (b.total || 0), 0);
+
+        document.getElementById('totalBookings').textContent = allBookings.length;
+        document.getElementById('confirmedBookings').textContent = confirmedBookings.length;
+        document.getElementById('totalCustomers').textContent = uniqueCustomers;
+        document.getElementById('totalRevenue').textContent = totalRevenue;
+
+        renderBookings();
+      } catch (error) {
+        console.error('خطأ:', error);
+        document.getElementById('loading').innerHTML = '<span style="color:#ef4444">حدث خطأ في تحميل البيانات</span>';
+      }
+    }
+
+    function renderBookings() {
+      let bookings = [...allBookings];
+
+      const search = document.getElementById('searchBox').value.toLowerCase();
+      if (search) {
+        bookings = bookings.filter(b =>
+          b.customer_name.toLowerCase().includes(search) ||
+          b.contact.includes(search) ||
+          b.date_display.includes(search)
+        );
+      }
+
+      document.getElementById('loading').style.display = 'none';
+
+      if (bookings.length === 0) {
+        document.getElementById('tableWrapper').style.display = 'none';
+        document.getElementById('emptyState').style.display = 'block';
+        return;
+      }
+
+      document.getElementById('tableWrapper').style.display = 'block';
+      document.getElementById('emptyState').style.display = 'none';
+
+      const tbody = document.getElementById('tableBody');
+      tbody.innerHTML = bookings.map(booking => `
+        <tr>
+          <td>#${booking.id}</td>
+          <td><strong>${booking.customer_name}</strong><br><small style="color:#6b7280">${booking.contact}</small></td>
+          <td>${booking.date_display}</td>
+          <td>${booking.time}</td>
+          <td>${booking.items.map(i => i.service_name).join('، ')}</td>
+          <td>${booking.professional?.name || 'أي محترف'}</td>
+          <td><strong>${booking.total} ر.س</strong></td>
+          <td><span class="status-badge status-${booking.status}">${booking.status === 'confirmed' ? 'مؤكد' : 'ملغي'}</span></td>
+          <td>
+            <div class="actions">
+              <button class="btn btn-view" onclick="viewDetails(${booking.id})">عرض</button>
+              ${booking.status === 'confirmed' ? `
+                <button class="btn btn-edit" onclick="editBooking(${booking.id})">تعديل</button>
+                <button class="btn btn-delete" onclick="cancelBooking(${booking.id})">إلغاء</button>
+              ` : ''}
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function viewDetails(id) {
+      const booking = allBookings.find(b => b.id === id);
+      if (!booking) return;
+      
+      currentBookingId = id;
+
+      const modal = document.getElementById('detailsModal');
+      const body = document.getElementById('modalBody');
+
+      // عرض قائمة الخدمات مع أزرار حذف
+      const servicesHTML = booking.items.map((item) => `
+        <div class="service-item">
+          <div class="service-info">
+            <div class="service-name">${item.service_name}</div>
+            <div class="service-meta">
+              ${item.price} ر.س • ${item.minutes} دقيقة • ${item.professional_name || 'أي محترف'}
+            </div>
+          </div>
+          ${booking.items.length > 1 ? `
+            <button class="btn-delete-service" onclick="deleteService(${booking.id}, ${item.id})">
+              حذف
+            </button>
+          ` : ''}
+        </div>
+      `).join('');
+
+      body.innerHTML = `
+        <div class="detail-row">
+          <span class="detail-label">رقم الحجز</span>
+          <span class="detail-value">#${booking.id}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">اسم العميل</span>
+          <span class="detail-value">${booking.customer_name}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">رقم الجوال</span>
+          <span class="detail-value">${booking.contact}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">التاريخ</span>
+          <span class="detail-value">${booking.date_display}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">الوقت</span>
+          <span class="detail-value">${booking.time}</span>
+        </div>
+        <div style="padding:12px 0; border-bottom:1px solid var(--line)">
+          <div class="detail-label" style="margin-bottom:12px">الخدمات</div>
+          <div class="services-list">
+            ${servicesHTML}
+          </div>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">الإجمالي</span>
+          <span class="detail-value" style="color:#10b981; font-size:20px">${booking.total} ر.س</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">الحالة</span>
+          <span class="detail-value">
+            <span class="status-badge status-${booking.status}">
+              ${booking.status === 'confirmed' ? 'مؤكد' : 'ملغي'}
+            </span>
+          </span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">تاريخ الإنشاء</span>
+          <span class="detail-value">${new Date(booking.created_at).toLocaleString('ar-SA')}</span>
+        </div>
+      `;
+
+      modal.classList.add('show');
+    }
+
+    async function deleteService(bookingId, serviceIndex) {
+      if (!confirm('هل تريدين حذف هذه الخدمة فقط؟')) return;
+
+      try {
+        const response = await fetch(`${API_URL}/bookings/${bookingId}/items/${serviceIndex}`, {
+          method: 'DELETE'
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          alert('✅ تم حذف الخدمة بنجاح');
+          closeModal();
+          loadBookings();
+        } else {
+          alert('❌ ' + (result.error || 'فشل حذف الخدمة'));
+        }
+      } catch (error) {
+        console.error('خطأ:', error);
+        alert('❌ حدث خطأ أثناء حذف الخدمة');
+      }
+    }
+
+    async function cancelBooking(id) {
+      if (!confirm('هل أنتِ متأكدة من إلغاء هذا الحجز بالكامل؟')) return;
+
+      try {
+        const response = await fetch(`${API_URL}/bookings/${id}`, {
+          method: 'DELETE'
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          alert('✅ تم إلغاء الحجز بنجاح');
+          loadBookings();
+        } else {
+          alert('❌ فشل إلغاء الحجز');
+        }
+      } catch (error) {
+        console.error('خطأ:', error);
+        alert('❌ حدث خطأ أثناء إلغاء الحجز');
+      }
+    }
+
+    async function editBooking(id) {
+      const booking = allBookings.find(b => b.id === id);
+      if (!booking) return;
+
+      currentBookingId = id;
+
+      // Load professionals and services if not already loaded
+      if (allProfessionals.length === 0) {
+        await loadProfessionals();
+      }
+      if (allServices.length === 0) {
+        await loadServices();
+      }
+
+      // Populate form with booking data
+      document.getElementById('editDate').value = booking.date_iso;
+      document.getElementById('editTime').value = booking.time;
+
+      // Populate professional select
+      populateProfessionalSelect(booking.professional_id);
+
+      // Populate services
+      populateServicesSelect(booking.items);
+
+      // Show modal
+      document.getElementById('editModal').classList.add('show');
+    }
+
+    async function loadProfessionals() {
+      try {
+        const response = await fetch(`${API_URL}/professionals`);
+        const result = await response.json();
+        if (result.success) {
+          allProfessionals = result.data;
+        }
+      } catch (error) {
+        console.error('Error loading professionals:', error);
+      }
+    }
+
+    async function loadServices() {
+      try {
+        const response = await fetch(`${API_URL}/services`);
+        const result = await response.json();
+        if (result.success) {
+          allServices = result.data;
+        }
+      } catch (error) {
+        console.error('Error loading services:', error);
+      }
+    }
+
+    function populateProfessionalSelect(selectedId) {
+      const select = document.getElementById('editProfessional');
+      select.innerHTML = '<option value="">اختر المحترفة</option>' +
+        allProfessionals.map(p => `<option value="${p.id}" ${p.id == selectedId ? 'selected' : ''}>${p.name}</option>`).join('');
+    }
+
+    function populateServicesSelect(selectedServices) {
+      const container = document.getElementById('editServices');
+      container.innerHTML = allServices.map(service => {
+        const isSelected = selectedServices.some(s => s.service_id === service.id);
+        return `
+          <div class="service-option">
+            <div class="service-info">
+              <div class="service-name">${service.name}</div>
+              <div class="service-details">${service.price} ر.س • ${service.minutes} دقيقة</div>
+            </div>
+            <input type="checkbox" class="service-checkbox" value="${service.id}" ${isSelected ? 'checked' : ''}>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function closeEditModal() {
+      document.getElementById('editModal').classList.remove('show');
+      currentBookingId = null;
+    }
+
+    // Handle edit form submission
+    document.getElementById('editForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const date = document.getElementById('editDate').value;
+      const time = document.getElementById('editTime').value;
+      const professionalId = document.getElementById('editProfessional').value;
+      const selectedServices = Array.from(document.querySelectorAll('#editServices input:checked')).map(cb => parseInt(cb.value));
+
+      if (!date || !time || !professionalId || selectedServices.length === 0) {
+        alert('يرجى ملء جميع الحقول');
+        return;
+      }
+
+      // Get professional details
+      const selectedProfessional = allProfessionals.find(p => p.id == professionalId);
+
+      // Build items array with service details
+      const items = selectedServices.map(serviceId => {
+        const service = allServices.find(s => s.id === serviceId);
+        return {
+          service_id: service.id,
+          service_name: service.name,
+          price: service.price,
+          minutes: service.minutes,
+          professional_id: parseInt(professionalId),
+          professional_name: selectedProfessional?.name || 'أي محترف'
+        };
+      });
+
+      // Calculate total
+      const total = items.reduce((sum, item) => sum + item.price, 0);
+
+      try {
+        const response = await fetch(`${API_URL}/bookings/${currentBookingId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            date_iso: date,
+            time: time,
+            professional: {
+              id: parseInt(professionalId),
+              name: selectedProfessional?.name || 'أي محترف'
+            },
+            items: items,
+            total: total
+          })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          alert('✅ تم تحديث الحجز بنجاح');
+          closeEditModal();
+          window.location.reload();
+        } else {
+          alert('❌ ' + (result.error || 'فشل تحديث الحجز'));
+        }
+      } catch (error) {
+        console.error('خطأ:', error);
+        alert('❌ حدث خطأ أثناء تحديث الحجز');
+      }
+    });
+
+    function closeModal() {
+      document.getElementById('detailsModal').classList.remove('show');
+      currentBookingId = null;
+    }
+
+    document.getElementById('searchBox').addEventListener('input', renderBookings);
+
+    loadBookings();
+  </script>
+</body>
+</html>

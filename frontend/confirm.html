@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>تأكيد الموعد — BONITA TOUCH</title>
+  <style>
+    :root{
+      --bg:#fafafa; --card:#fff; --line:#ececec; --fg:#111; --muted:#666;
+      --accent:#6f4ef6; --radius:16px; --shadow:0 12px 40px rgba(0,0,0,.06);
+      --success:#22c55e; --danger:#ef4444;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--fg)}
+    a{text-decoration:none;color:inherit}
+
+    .page{max-width:1180px;margin:0 auto;padding:0 16px 40px}
+
+    .photo-slider{
+      position:relative;
+      width:100%;
+      max-width:1180px;
+      height:260px;
+      border-radius:24px;
+      overflow:hidden;
+      box-shadow:0 18px 48px rgba(0,0,0,0.08);
+      margin: 0 auto 24px auto;
+      background:#fde3ee;
+    }
+    .photo-slider img{
+      position:absolute;
+      width:100%;
+      height:260px;
+      object-fit:cover;
+      border-radius:24px;
+      top:0;left:0;
+      opacity:0;
+      transition:opacity 1s ease-in-out;
+    }
+    .photo-slider img.active{
+      opacity:1;
+      position:relative;
+    }
+
+    .hero{display:none}
+    .layout{display:grid;grid-template-columns:1fr 340px;grid-template-areas:"main aside";gap:24px;align-items:start;margin-top:24px}
+    main{grid-area: main}
+    aside{grid-area: aside}
+
+    .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+    .box{padding:18px}
+    .row{display:flex;align-items:center;gap:10px}
+    .row-between{display:flex;justify-content:space-between;gap:10px;align-items:center}
+    .hr{height:1px;background:linear-gradient(90deg,#eee,#f2eafe,#eee);margin:12px 0}
+
+    .status{display:inline-flex;align-items:center;gap:10px;border:1px solid #dcfce7;background:#f0fdf4;color:#166534;border-radius:999px;padding:8px 12px;font-weight:800}
+    .big-time{font-size:32px;font-weight:900;margin:8px 0}
+    .muted{color:var(--muted)}
+    .pill{display:inline-block;padding:6px 10px;background:#f3f4f6;border-radius:999px;font-size:12px}
+
+    .btn{appearance:none;border:0;border-radius:14px;padding:14px 16px;font-weight:800;cursor:pointer}
+    .btn-dark{background:#111;color:#fff}
+    .btn-light{background:#fff;border:1px solid var(--line)}
+    .btn-danger{background:var(--danger);color:#fff}
+    .btn-ghost{background:#f5f2ff;border:1px solid #e7e1ff;color:#4b3fd6}
+
+    .brand-card{display:flex;align-items:center;gap:14px;padding:16px}
+    .brand-card .thumb{width:100px;height:100px;border-radius:20px;object-fit:cover;box-shadow:var(--shadow)}
+    .brand-card .name{font-size:22px;font-weight:900;margin:0}
+    .brand-card .meta{color:var(--muted);margin-top:6px}
+
+    .modal{position:fixed; inset:0; display:none; place-items:center; background:rgba(0,0,0,.45); padding:16px; z-index:40}
+    .modal.show{display:grid}
+    .modal .sheet{width:min(720px,100%); background:#fff; border-radius:20px; box-shadow:var(--shadow); overflow:hidden}
+    .sheet-head{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;border-bottom:1px solid var(--line)}
+    .sheet-body{padding:18px}
+    .close-x{inline-size:36px;block-size:36px;border-radius:10px;border:1px solid var(--line);background:#fff;cursor:pointer}
+
+    .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+    .actions .btn{min-width:180px}
+    @media(max-width:520px){.actions{justify-content:stretch}.actions .btn{flex:1}}
+    @media(max-width:1024px){.layout{grid-template-columns:1fr;grid-template-areas:"aside""main"}}
+  </style>
+</head>
+<body>
+
+<section class="photo-slider">
+  <img src="1.jpg" class="active" />
+  <img src="2.jpg" />
+  <img src="3.jpg" />
+  <img src="4.jpg" />
+</section>
+
+<div class="page">
+  <div class="layout">
+
+    <main>
+      <div class="card box">
+        <div class="row" style="justify-content:space-between">
+          <div class="status">تم التأكيد</div>
+          <div class="pill" id="datePill">—</div>
+        </div>
+
+        <div id="successMessage" style="display:none;background:#f0fdf4;border:1px solid #dcfce7;color:#166534;padding:12px;border-radius:12px;margin-bottom:12px;font-weight:600;text-align:center">
+          تم تعديل الموعد بنجاح
+        </div>
+
+        <div class="big-time" id="timeBig">—</div>
+        <div class="muted" id="durationText">المدة 45 دقيقة</div>
+
+        <div class="hr"></div>
+
+        <div class="muted" style="margin-bottom:4px">الاسم</div>
+        <div id="customerName">—</div>
+
+        <div class="hr"></div>
+
+        <div class="muted" style="margin-bottom:4px">رقم الجوال</div>
+        <div id="customerPhone">—</div>
+
+        <div class="hr"></div>
+
+        <div class="actions">
+          <button class="btn btn-ghost" id="editBtn">تعديل الموعد</button>
+          <button class="btn btn-danger" id="cancelBtn">إلغاء الموعد</button>
+        </div>
+      </div>
+    </main>
+
+    <aside>
+      <div class="card brand-card" style="margin-bottom:14px">
+        <div style="flex:1">
+          <h3 class="name">BONITA TOUCH</h3>
+          <div class="meta">النعيم، جدة</div>
+        </div>
+        <img class="thumb" src="4.jpg">
+      </div>
+
+      <div class="card box">
+        <div class="muted" style="margin-bottom:8px">الخدمة/الخدمات</div>
+        <div id="sideItems"></div>
+
+        <div class="hr"></div>
+        <div class="muted" style="margin-bottom:4px">المحترف/المحترفون</div>
+        <div class="pill" id="prosPill">أي محترف</div>
+
+        <div class="hr"></div>
+        <div class="row-between">
+          <span class="muted">التاريخ</span>
+          <span id="dateOut">—</span>
+        </div>
+        <div class="row-between" style="margin-top:8px">
+          <span class="muted">الوقت</span>
+          <span id="timeOut">—</span>
+        </div>
+
+        <div class="hr"></div>
+        <div class="row-between">
+          <span class="muted">الإجمالي</span>
+          <span style="font-weight:900"><span id="totalSide">0</span> ر.س</span>
+        </div>
+
+        <button class="btn btn-dark" style="width:100%;margin-top:12px" id="backHome">رجوع للرئيسية</button>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<div class="modal" id="cancelModal">
+  <div class="sheet" style="max-width:560px">
+    <div class="sheet-head">
+      <div style="font-weight:900;font-size:20px">هل لديك رغبة فعلاً في الإلغاء؟</div>
+      <button class="close-x" data-close>✕</button>
+    </div>
+    <div class="sheet-body">
+      <p class="muted" style="line-height:1.9">
+        إذا رغبتِ في تغيير وقت الموعد، فيمكنكِ إعادة تحديد موعد الحجز.
+        هل لديكِ رغبة فعلاً في إلغاء موعدكِ؟
+      </p>
+      <div class="row" style="justify-content:flex-end;gap:8px;margin-top:6px">
+        <button class="btn btn-light" data-close>العودة</button>
+        <button class="btn btn-danger" id="confirmCancel">نعم، إلغاء</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.photo-slider img');
+  let currentIndex = 0;
+
+  function showSlide(index){
+    slides.forEach((slide,i)=>slide.classList.toggle('active',i===index));
+  }
+  function nextSlide(){
+    currentIndex = (currentIndex + 1) % slides.length;
+    showSlide(currentIndex);
+  }
+  setInterval(nextSlide,4000);
+  showSlide(currentIndex);
+
+  // أزرار الانتقال 👇
+  cancelBtn.onclick = () => {
+    if (booking.booking_id) {
+      cancelModal.classList.add('show');
+    } else {
+      alert('لا يمكن إلغاء الحجز لأنه لم يتم حفظه بعد.');
+    }
+  };
+  editBtn.onclick   = () => location.href = 'time.html';
+  backHome.onclick  = () => location.href = 'home.html'; /* ⭐ تمت الإضافة هنا */
+
+  // إلغاء الحجز عبر API
+  confirmCancel.onclick = async () => {
+    if (!booking.booking_id) return;
+
+    try {
+      const response = await fetch(`http://localhost:5000/api/bookings/${booking.booking_id}`, {
+        method: 'DELETE'
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // إزالة الحجز من localStorage
+        localStorage.removeItem('booking');
+        // الانتقال لصفحة الإلغاء
+        location.href = 'canceled.html';
+      } else {
+        alert('فشل في إلغاء الحجز: ' + (result.error || 'خطأ غير معروف'));
+      }
+    } catch (error) {
+      console.error('خطأ في إلغاء الحجز:', error);
+      alert('تعذر الاتصال بالسيرفر. تأكد من تشغيل السيرفر على المنفذ 5000');
+    }
+  };
+
+  // إغلاق المودال
+  document.querySelectorAll('[data-close]').forEach(btn => {
+    btn.onclick = () => cancelModal.classList.remove('show');
+  });
+  cancelModal.onclick = (e) => {
+    if (e.target === cancelModal) cancelModal.classList.remove('show');
+  };
+
+  // استرجاع بيانات الحجز من LocalStorage
+  let booking = {};
+  try {
+    booking = JSON.parse(localStorage.getItem('booking') || '{}');
+  } catch(e){}
+
+  // تعبئة الخدمات في aside
+  function renderServices(){
+    const sideItems = document.getElementById('sideItems');
+
+    if(Array.isArray(booking.items) && booking.items.length){
+      sideItems.innerHTML = booking.items.map(item => `
+        <div class="row-between" style="padding:6px 0">
+          <span>${item.title || item.name || 'خدمة'}</span>
+          <span>${item.price ? item.price + ' ر.س' : ''}</span>
+        </div>
+      `).join('');
+    } else {
+      sideItems.innerHTML = '<div class="muted">—</div>';
+    }
+
+    document.getElementById('datePill').textContent = booking.date || '—';
+    document.getElementById('dateOut').textContent  = booking.date || '—';
+    document.getElementById('timeBig').textContent  = booking.time || '—';
+    document.getElementById('timeOut').textContent  = booking.time || '—';
+    document.getElementById('totalSide').textContent = booking.total || 0;
+    document.getElementById('customerName').textContent = booking.customer_name || '—';
+    document.getElementById('customerPhone').textContent = (booking.contact && booking.contact.value) || '—';
+
+    const prosPill = document.getElementById('prosPill');
+    prosPill.textContent = (booking.pros && booking.pros.length)
+      ? booking.pros.map(p => p.name).join('، ')
+      : 'أي محترف';
+  }
+
+  // تشغيل الدالة عند تحميل الصفحة
+  renderServices();
+
+  // التحقق من وجود رسالة النجاح في URL
+  const urlParams = new URLSearchParams(window.location.search);
+  if(urlParams.get('success') === '1'){
+    document.getElementById('successMessage').style.display = 'block';
+    // إزالة المعامل من URL بعد عرض الرسالة
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
+</script>
+
+</body>
+</html>
