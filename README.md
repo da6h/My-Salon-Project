@@ -179,4 +179,4 @@ Built as part of Software Engineering studies to demonstrate:
 
 **⭐ If you find this project helpful, please consider giving it a star!**
 
-*Developed with 💙 at University of Jeddah | 2025*
+
